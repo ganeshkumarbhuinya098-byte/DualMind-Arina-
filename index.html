@@ -1,508 +1,331 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dual Mind Arena - Memory Match</title>
-<style>
-body {
-margin: 0;
-font-family: Arial, sans-serif;
-background: #0d0d12;
-color: white;
-text-align: center;
-display: flex;
-flex-direction: column;
-align-items: center;
-min-height: 100vh;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-h1 {
-color: #b1b3fb;
-font-size: 28px;
-margin-top: 20px;
-margin-bottom: 5px;
-text-transform: capitalize;
-}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f0e17;
+            color: #fffffe;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
 
-p {
-color: #6a6a7c;
-margin-top: 0;
-margin-bottom: 20px;
-font-size: 14px;
-text-transform: uppercase;
-}
+        #game-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            text-align: center;
+            /* यहाँ से गेम का ऊपरी हिस्सा 45px नीचे खिसक जाएगा ताकि स्टेटस बार से न चिपके */
+            margin-top: 45px; 
+        }
 
-.scoreboard {
-display: flex;
-gap: 20px;
-margin-bottom: 30px;
-width: 90%;
-max-width: 600px;
-justify-content: center;
-position: relative;
-}
+        /* गेम के नाम (Heading) को सुंदर और नीचे सेट करने के लिए */
+        h1 {
+            font-size: 1.8rem;
+            color: #a7a9be;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-.player-score {
-flex: 1;
-max-width: 200px;
-background: #17171e;
-border: 2px solid #282830;
-border-radius: 10px;
-padding: 10px 15px;
-text-align: left;
-display: flex;
-align-items: center;
-gap: 15px;
-position: relative;
-}
+        .subtitle {
+            font-size: 0.8rem;
+            color: #ff8906;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
 
-.player-score.player1.active {
-border-color: #797bff;
-box-shadow: 0 0 10px rgba(121, 123, 255, 0.4);
-}
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            gap: 15px;
+        }
 
-.player-score.player2.active {
-border-color: #38bdf8;
-box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
-}
+        .player-box {
+            flex: 1;
+            background-color: #16161a;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+        }
 
-.player-icon {
-width: 40px;
-height: 40px;
-border-radius: 50%;
-display: flex;
-justify-content: center;
-align-items: center;
-font-weight: bold;
-font-size: 18px;
-}
+        .player-box.active {
+            border-color: #7f5af0;
+            box-shadow: 0 0 15px rgba(127, 90, 240, 0.4);
+        }
 
-.player1 .player-icon {
-background: #797bff;
-color: white;
-}
+        .player-box .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin: 0 auto 8px auto;
+        }
 
-.player2 .player-icon {
-background: #38bdf8;
-color: black;
-}
+        #p1-box .avatar { background-color: #7f5af0; color: #fff; }
+        #p2-box .avatar { background-color: #2cb67d; color: #fff; }
 
-.player-details {
-display: flex;
-flex-direction: column;
-}
+        .player-name {
+            font-size: 0.8rem;
+            color: #94a1b2;
+            margin-bottom: 2px;
+        }
 
-.player-name {
-color: #6a6a7c;
-font-size: 12px;
-margin-bottom: 2px;
-}
+        .score {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #fffffe;
+        }
 
-.score-value {
-font-size: 28px;
-font-weight: bold;
-}
+        .turn-indicator {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #7f5af0;
+            color: #fffffe;
+            font-size: 0.65rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
 
-.turn-indicator {
-position: absolute;
-bottom: -18px;
-left: 50%;
-transform: translateX(-50%);
-background: #797bff;
-color: white;
-font-size: 10px;
-padding: 2px 8px;
-border-radius: 10px;
-text-transform: uppercase;
-letter-spacing: 0.5px;
-display: none;
-white-space: nowrap;
-}
+        .player-box.active .turn-indicator {
+            opacity: 1;
+        }
 
-.player-score.player1.active .turn-indicator {
-background: #797bff;
-display: block;
-}
+        #p2-box .turn-indicator {
+            background-color: #2cb67d;
+        }
 
-.player-score.player2.active .turn-indicator {
-background: #38bdf8;
-display: block;
-color: black;
-}
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
 
-.vs-text {
-position: absolute;
-left: 50%;
-top: 50%;
-transform: translate(-50%, -50%);
-color: #6a6a7c;
-font-size: 12px;
-text-transform: uppercase;
-pointer-events: none;
-}
+        .card {
+            aspect-ratio: 1;
+            background-color: #16161a;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #94a1b2;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.3s, background-color 0.3s;
+            border: 1px solid #24242e;
+        }
 
-.game-grid {
-display: grid;
-grid-template-columns: repeat(4, 1fr);
-gap: 15px;
-width: 90%;
-max-width: 450px;
-margin-bottom: 30px;
-}
+        .card.flipped {
+            transform: rotateY(180deg);
+            background-color: #24242e;
+            color: #fffffe;
+        }
 
-.card {
-background: #17171e;
-border-radius: 8px;
-aspect-ratio: 1;
-display: flex;
-justify-content: center;
-align-items: center;
-cursor: pointer;
-transition: background-color 0.2s, transform 0.2s;
-position: relative;
-transform-style: preserve-3d;
-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-}
+        .card.matched {
+            background-color: #00000000;
+            border-color: transparent;
+            color: transparent;
+            visibility: hidden;
+            pointer-events: none;
+        }
 
-.card:hover {
-background-color: #282830;
-}
+        button {
+            background-color: transparent;
+            color: #94a1b2;
+            border: 1px solid #24242e;
+            padding: 10px 30px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
 
-.card .card-face {
-position: absolute;
-width: 100%;
-height: 100%;
-display: flex;
-justify-content: center;
-align-items: center;
-border-radius: 8px;
-backface-visibility: hidden;
-}
-
-.card .card-front {
-color: #6a6a7c;
-font-size: 24px;
-transform: rotateY(0deg);
-}
-
-.card .card-back {
-transform: rotateY(180deg);
-font-size: 32px;
-}
-
-.card.flipped {
-transform: rotateY(180deg);
-cursor: default;
-}
-
-.card[data-matched="true"] {
-opacity: 0.4;
-cursor: default;
-}
-
-button.restart-btn {
-background: #17171e;
-border: 2px solid #282830;
-color: #6a6a7c;
-padding: 10px 30px;
-border-radius: 8px;
-font-size: 14px;
-cursor: pointer;
-transition: border-color 0.2s, color 0.2s;
-text-transform: capitalize;
-}
-
-button.restart-btn:hover {
-border-color: #b1b3fb;
-color: #b1b3fb;
-}
-
-/* सुंदर कस्टम गेम ओवर स्क्रीन */
-.modal-overlay {
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background: rgba(0, 0, 0, 0.85);
-display: flex;
-justify-content: center;
-align-items: center;
-z-index: 1000;
-opacity: 0;
-pointer-events: none;
-transition: opacity 0.3s ease;
-}
-
-.modal-overlay.show {
-opacity: 1;
-pointer-events: auto;
-}
-
-.modal-box {
-background: #17171e;
-border: 2px solid #282830;
-border-radius: 15px;
-padding: 30px;
-width: 85%;
-max-width: 350px;
-text-align: center;
-box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-transform: scale(0.7);
-transition: transform 0.3s ease;
-}
-
-.modal-overlay.show .modal-box {
-transform: scale(1);
-}
-
-.modal-title {
-font-size: 24px;
-color: #b1b3fb;
-margin-bottom: 15px;
-font-weight: bold;
-}
-
-.modal-scores {
-background: #0d0d12;
-border-radius: 10px;
-padding: 15px;
-margin-bottom: 20px;
-font-size: 16px;
-line-height: 1.6;
-color: #b1b3fb;
-}
-
-.modal-btn {
-background: #797bff;
-color: white;
-border: none;
-padding: 12px 30px;
-border-radius: 8px;
-font-size: 16px;
-font-weight: bold;
-cursor: pointer;
-width: 100%;
-transition: background 0.2s;
-}
-
-.modal-btn:hover {
-background: #5b5dfa;
-}
-
-@media (max-width: 400px) {
-h1 { font-size: 24px; }
-.score-value { font-size: 22px; }
-.card .card-front { font-size: 20px; }
-.card .card-back { font-size: 28px; }
-}
-</style>
+        button:hover {
+            background-color: #24242e;
+            color: #fffffe;
+        }
+    </style>
 </head>
 <body>
 
-<h1>Memory Match</h1>
-<p>2 Player Puzzle Game</p>
+    <div id="game-container">
+        <h1>Memory Match</h1>
+        <div class="subtitle">2 Player Puzzle Game</div>
 
-<div class="scoreboard">
-<div class="player-score player1 active" id="player1Scorecard">
-<div class="player-icon">P1</div>
-<div class="player-details">
-<div class="player-name">Player 1</div>
-<div class="score-value" id="p1Score">0</div>
-</div>
-<div class="turn-indicator">Your Turn</div>
-</div>
+        <div class="scoreboard">
+            <div id="p1-box" class="player-box active">
+                <div class="avatar">P1</div>
+                <div class="player-name">Player 1</div>
+                <div id="p1-score" class="score">0</div>
+                <div class="turn-indicator">Your Turn</div>
+            </div>
+            <div id="p2-box" class="player-box">
+                <div class="avatar">P2</div>
+                <div class="player-name">Player 2</div>
+                <div id="p2-score" class="score">0</div>
+                <div class="turn-indicator">Your Turn</div>
+            </div>
+        </div>
 
-<div class="vs-text">vs</div>
+        <div id="grid" class="grid"></div>
 
-<div class="player-score player2" id="player2Scorecard">
-<div class="player-icon">P2</div>
-<div class="player-details">
-<div class="player-name">Player 2</div>
-<div class="score-value" id="p2Score">0</div>
-</div>
-<div class="turn-indicator">Your Turn</div>
-</div>
-</div>
+        <button id="restart-btn">Restart</button>
+    </div>
 
-<div class="game-grid" id="gameGrid">
-</div>
+    <script>
+        const emojis = ['🧠', '🧠', '⚡', '⚡', '⭐', '⭐', '🔥', '🔥', '👑', '👑', '💎', '💎', '🍀', '🍀', '🎯', '🎯'];
+        let shuffledEmojis = [];
+        let flippedCards = [];
+        let scores = { p1: 0, p2: 0 };
+        let activePlayer = 'p1';
+        let canFlip = true;
 
-<button class="restart-btn" id="restartBtn">Restart</button>
+        const gridElement = document.getElementById('grid');
+        const p1ScoreElement = document.getElementById('p1-score');
+        const p2ScoreElement = document.getElementById('p2-score');
+        const p1Box = document.getElementById('p1-box');
+        const p2Box = document.getElementById('p2-box');
+        const restartBtn = document.getElementById('restart-btn');
 
-<div class="modal-overlay" id="gameOverModal">
-<div class="modal-box">
-<div class="modal-title" id="winnerText">Game Over!</div>
-<div class="modal-scores" id="finalScoresText">
-Player 1: 0<br>Player 2: 0
-</div>
-<button class="modal-btn" id="modalCloseBtn">Play Again</button>
-</div>
-</div>
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
 
-<script>
-const grid = document.getElementById('gameGrid');
-const p1ScoreText = document.getElementById('p1Score');
-const p2ScoreText = document.getElementById('p2Score');
-const p1Scorecard = document.getElementById('player1Scorecard');
-const p2Scorecard = document.getElementById('player2Scorecard');
-const restartBtn = document.getElementById('restartBtn');
+        function initGame() {
+            gridElement.innerHTML = '';
+            shuffledEmojis = shuffle([...emojis]);
+            flippedCards = [];
+            scores = { p1: 0, p2: 0 };
+            activePlayer = 'p1';
+            canFlip = true;
 
-// पॉप-अप एलिमेंट्स
-const gameOverModal = document.getElementById('gameOverModal');
-const winnerText = document.getElementById('winnerText');
-const finalScoresText = document.getElementById('finalScoresText');
-const modalCloseBtn = document.getElementById('modalCloseBtn');
+            p1ScoreElement.textContent = '0';
+            p2ScoreElement.textContent = '0';
+            p1Box.className = 'player-box active';
+            p2Box.className = 'player-box';
 
-// यहाँ 34 मजेदार इमोजीस का बड़ा पूल है, जिससे हर मैच में रैंडम जोड़े बनेंगे
-const emojiPool = [
-'🤩', '😎', '🥳', '👻', '🔥', '🤪', '🤫', '👑', 
-'🤖', '👽', '🐶', '🐱', '🦁', '🐵', '🦊', '🦄', 
-'🍕', '🍔', '🍟', '🍦', '🎮', '⚽', '🎸', '🚀', 
-'🛸', '💎', '🎈', '🎉', '🍿', '🐼', '🐯', '🌈', '⚡', '🔮'
-];
+            for (let i = 0; i < 16; i++) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.index = i;
+                card.textContent = '?';
+                card.addEventListener('click', handleCardClick);
+                gridElement.appendChild(card);
+            }
+        }
 
-let pairs = [];
-let flippedCards = [];
-let p1Score = 0;
-let p2Score = 0;
-let currentPlayer = 1;
-let isFlippingDisabled = false;
+        function handleCardClick(e) {
+            const card = e.target;
+            const index = card.dataset.index;
 
-function shuffleArray(array) {
-for (let i = array.length - 1; i > 0; i--) {
-const j = Math.floor(Math.random() * (i + 1));
-[array[i], array[j]] = [array[j], array[i]];
-}
-return array;
-}
+            if (!canFlip || card.classList.contains('flipped') || card.classList.contains('matched') || flippedCards.length >= 2) {
+                return;
+            }
 
-// हर मैच के लिए अलग और रैंडम इमोजी जोड़े चुनने का फंक्शन
-function selectRandomPairs() {
-// पहले पूरे इमोजी पूल को मिक्स करते हैं
-let shuffledPool = shuffleArray([...emojiPool]);
-// उसमें से शुरुआती 8 अलग-अलग इमोजी चुनते हैं
-let selectedEmojis = shuffledPool.slice(0, 8);
-// उनके जोड़े (8 * 2 = 16) बनाते हैं
-pairs = [...selectedEmojis, ...selectedEmojis];
-}
+            card.classList.add('flipped');
+            card.textContent = shuffledEmojis[index];
+            flippedCards.push(card);
 
-function generateGrid() {
-grid.innerHTML = '';
-selectRandomPairs(); // नए रैंडम इमोजी सिलेक्ट करें
-shuffleArray(pairs); // उन्हें ग्रिड के लिए मिक्स करें
+            if (flippedCards.length === 2) {
+                canFlip = false;
+                setTimeout(checkMatch, 800);
+            }
+        }
 
-pairs.forEach(pairSymbol => {
-const card = document.createElement('div');
-card.classList.add('card');
-card.dataset.pairSymbol = pairSymbol;
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            const val1 = shuffledEmojis[card1.dataset.index];
+            const val2 = shuffledEmojis[card2.dataset.index];
 
-const cardFront = document.createElement('div');
-cardFront.classList.add('card-face', 'card-front');
-cardFront.textContent = '?';
+            if (val1 === val2) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                scores[activePlayer]++;
+                updateScores();
+            } else {
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+                card1.textContent = '?';
+                card2.textContent = '?';
+                switchPlayer();
+            }
 
-const cardBack = document.createElement('div');
-cardBack.classList.add('card-face', 'card-back');
-cardBack.textContent = pairSymbol;
+            flippedCards = [];
+            canFlip = true;
+            checkGameOver();
+        }
 
-card.appendChild(cardFront);
-card.appendChild(cardBack);
+        function switchPlayer() {
+            activePlayer = activePlayer === 'p1' ? 'p2' : 'p1';
+            if (activePlayer === 'p1') {
+                p1Box.classList.add('active');
+                p2Box.classList.remove('active');
+            } else {
+                p2Box.classList.add('active');
+                p1Box.classList.remove('active');
+            }
+        }
 
-card.addEventListener('click', () => flipCard(card));
-grid.appendChild(card);
-});
-}
+        function updateScores() {
+            p1ScoreElement.textContent = scores.p1;
+            p2ScoreElement.textContent = scores.p2;
+        }
 
-function flipCard(card) {
-if (isFlippingDisabled || card.classList.contains('flipped') || card.dataset.matched) {
-return;
-}
+        function checkGameOver() {
+            const matchedCards = document.querySelectorAll('.card.matched');
+            if (matchedCards.length === 16) {
+                setTimeout(() => {
+                    if (scores.p1 > scores.p2) {
+                        alert('Player 1 Wins!');
+                    } else if (scores.p2 > scores.p1) {
+                        alert('Player 2 Wins!');
+                    } else {
+                        alert('It\'s a Tie!');
+                    }
+                }, 300);
+            }
+        }
 
-card.classList.add('flipped');
-flippedCards.push(card);
-
-if (flippedCards.length === 2) {
-isFlippingDisabled = true;
-setTimeout(checkMatch, 600);
-}
-}
-
-function checkMatch() {
-const [card1, card2] = flippedCards;
-
-if (card1.dataset.pairSymbol === card2.dataset.pairSymbol) {
-if (currentPlayer === 1) {
-p1Score++;
-p1ScoreText.textContent = p1Score;
-card1.style.borderColor = '#797bff';
-card2.style.borderColor = '#797bff';
-} else {
-p2Score++;
-p2ScoreText.textContent = p2Score;
-card1.style.borderColor = '#38bdf8';
-card2.style.borderColor = '#38bdf8';
-}
-card1.dataset.matched = 'true';
-card2.dataset.matched = 'true';
-
-flippedCards = [];
-isFlippingDisabled = false;
-
-checkGameOver();
-} else {
-setTimeout(() => {
-card1.classList.remove('flipped');
-card2.classList.remove('flipped');
-flippedCards = [];
-switchPlayer();
-isFlippingDisabled = false;
-}, 600);
-}
-}
-
-function switchPlayer() {
-currentPlayer = currentPlayer === 1 ? 2 : 1;
-p1Scorecard.classList.toggle('active');
-p2Scorecard.classList.toggle('active');
-}
-
-function checkGameOver() {
-const matchedCards = grid.querySelectorAll('.card[data-matched="true"]');
-if (matchedCards.length === pairs.length) {
-let winner = "No one! It's a draw!";
-if (p1Score > p2Score) {
-winner = 'Player 1 Wins! 🎉';
-} else if (p2Score > p1Score) {
-winner = 'Player 2 Wins! 🎉';
-}
-
-winnerText.textContent = winner;
-finalScoresText.innerHTML = `Final Scores:<br><b>Player 1:</b> ${p1Score}<br><b>Player 2:</b> ${p2Score}`;
-gameOverModal.classList.add('show');
-}
-}
-
-function restartGame() {
-flippedCards = [];
-p1Score = 0;
-p2Score = 0;
-p1ScoreText.textContent = '0';
-p2ScoreText.textContent = '0';
-currentPlayer = 1;
-p1Scorecard.classList.add('active');
-p2Scorecard.classList.toggle('active', false);
-isFlippingDisabled = false;
-gameOverModal.classList.remove('show');
-generateGrid(); // रीस्टार्ट करने पर बिल्कुल नए इमोजी लोड होंगे
-}
-
-restartBtn.addEventListener('click', restartGame);
-modalCloseBtn.addEventListener('click', restartGame);
-generateGrid();
-</script>
-
+        restartBtn.addEventListener('click', initGame);
+        initGame();
+    </script>
 </body>
   </html>
   
+
 
