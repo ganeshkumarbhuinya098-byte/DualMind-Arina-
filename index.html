@@ -28,11 +28,9 @@
             max-width: 400px;
             padding: 20px;
             text-align: center;
-            /* यहाँ से गेम का ऊपरी हिस्सा 45px नीचे खिसक जाएगा ताकि स्टेटस बार से न चिपके */
             margin-top: 45px; 
         }
 
-        /* गेम के नाम (Heading) को सुंदर और नीचे सेट करने के लिए */
         h1 {
             font-size: 1.8rem;
             color: #a7a9be;
@@ -175,6 +173,67 @@
             background-color: #24242e;
             color: #fffffe;
         }
+
+        /* 👑 नया एक नंबर वाला कस्टम पॉप-अप स्टाइल 👑 */
+        .custom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #16161a;
+            border: 2px solid #7f5af0;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(127, 90, 240, 0.5);
+            max-width: 320px;
+            width: 90%;
+            animation: popIn 0.4s ease;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-content h2 {
+            font-size: 2rem;
+            color: #ff8906;
+            margin-bottom: 15px;
+        }
+
+        .modal-content p {
+            font-size: 1.2rem;
+            color: #fffffe;
+            margin-bottom: 25px;
+        }
+
+        .modal-btn {
+            background-color: #7f5af0;
+            color: #fffffe;
+            border: none;
+            padding: 12px 35px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(127, 90, 240, 0.3);
+            transition: all 0.2s;
+        }
+
+        .modal-btn:hover {
+            background-color: #6b46c1;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -203,6 +262,14 @@
         <button id="restart-btn">Restart</button>
     </div>
 
+    <div id="resultModal" class="custom-modal">
+        <div class="modal-content">
+            <h2>🎉 GAME OVER 🎉</h2>
+            <p id="winnerText">Player 1 Wins!</p>
+            <button id="modalPlayAgain" class="modal-btn">Play Again</button>
+        </div>
+    </div>
+
     <script>
         const emojis = ['🧠', '🧠', '⚡', '⚡', '⭐', '⭐', '🔥', '🔥', '👑', '👑', '💎', '💎', '🍀', '🍀', '🎯', '🎯'];
         let shuffledEmojis = [];
@@ -217,6 +284,11 @@
         const p1Box = document.getElementById('p1-box');
         const p2Box = document.getElementById('p2-box');
         const restartBtn = document.getElementById('restart-btn');
+        
+        // पॉप-अप के एलिमेंट्स
+        const resultModal = document.getElementById('resultModal');
+        const winnerText = document.getElementById('winnerText');
+        const modalPlayAgain = document.getElementById('modalPlayAgain');
 
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -238,6 +310,8 @@
             p2ScoreElement.textContent = '0';
             p1Box.className = 'player-box active';
             p2Box.className = 'player-box';
+            
+            resultModal.style.display = 'none'; // पॉप-अप छुपाएं
 
             for (let i = 0; i < 16; i++) {
                 const card = document.createElement('div');
@@ -310,22 +384,23 @@
             const matchedCards = document.querySelectorAll('.card.matched');
             if (matchedCards.length === 16) {
                 setTimeout(() => {
+                    // पुराना alert हटाकर नया सुंदर पॉप-अप दिखाना
                     if (scores.p1 > scores.p2) {
-                        alert('Player 1 Wins!');
+                        winnerText.textContent = '🏆 Player 1 Wins! 🏆';
                     } else if (scores.p2 > scores.p1) {
-                        alert('Player 2 Wins!');
+                        winnerText.textContent = '🏆 Player 2 Wins! 🏆';
                     } else {
-                        alert('It\'s a Tie!');
+                        winnerText.textContent = '🤝 It\'s a Tie! 🤝';
                     }
+                    resultModal.style.display = 'flex';
                 }, 300);
             }
         }
 
         restartBtn.addEventListener('click', initGame);
+        modalPlayAgain.addEventListener('click', initGame);
         initGame();
     </script>
 </body>
-  </html>
-  
-
-
+                                        </html>
+    
