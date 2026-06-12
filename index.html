@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,7 +28,7 @@
             max-width: 400px;
             padding: 20px;
             text-align: center;
-            margin-top: 45px; 
+            margin-top: 55px; 
         }
 
         h1 {
@@ -174,7 +174,7 @@
             color: #fffffe;
         }
 
-        /* 👑 नया एक नंबर वाला कस्टम पॉप-अप स्टाइल 👑 */
+        /* Custom Winner Modal Style */
         .custom-modal {
             display: none;
             position: fixed;
@@ -278,6 +278,12 @@
         let activePlayer = 'p1';
         let canFlip = true;
 
+        // Load audio assets from GitHub repository
+        const flipSound = new Audio('flip.mp3');
+        const matchSound = new Audio('match.mp3');
+        const wrongSound = new Audio('wrong.mp3');
+        const winSound = new Audio('win.mp3');
+
         const gridElement = document.getElementById('grid');
         const p1ScoreElement = document.getElementById('p1-score');
         const p2ScoreElement = document.getElementById('p2-score');
@@ -285,7 +291,6 @@
         const p2Box = document.getElementById('p2-box');
         const restartBtn = document.getElementById('restart-btn');
         
-        // पॉप-अप के एलिमेंट्स
         const resultModal = document.getElementById('resultModal');
         const winnerText = document.getElementById('winnerText');
         const modalPlayAgain = document.getElementById('modalPlayAgain');
@@ -311,7 +316,7 @@
             p1Box.className = 'player-box active';
             p2Box.className = 'player-box';
             
-            resultModal.style.display = 'none'; // पॉप-अप छुपाएं
+            resultModal.style.display = 'none'; 
 
             for (let i = 0; i < 16; i++) {
                 const card = document.createElement('div');
@@ -330,6 +335,9 @@
             if (!canFlip || card.classList.contains('flipped') || card.classList.contains('matched') || flippedCards.length >= 2) {
                 return;
             }
+
+            // Play flip audio
+            flipSound.play().catch(err => console.log("Sound error"));
 
             card.classList.add('flipped');
             card.textContent = shuffledEmojis[index];
@@ -351,11 +359,15 @@
                 card2.classList.add('matched');
                 scores[activePlayer]++;
                 updateScores();
+                // Play correct match audio
+                matchSound.play().catch(err => console.log("Sound error"));
             } else {
                 card1.classList.remove('flipped');
                 card2.classList.remove('flipped');
                 card1.textContent = '?';
                 card2.textContent = '?';
+                // Play wrong match audio
+                wrongSound.play().catch(err => console.log("Sound error"));
                 switchPlayer();
             }
 
@@ -384,7 +396,9 @@
             const matchedCards = document.querySelectorAll('.card.matched');
             if (matchedCards.length === 16) {
                 setTimeout(() => {
-                    // पुराना alert हटाकर नया सुंदर पॉप-अप दिखाना
+                    // Play game win audio
+                    winSound.play().catch(err => console.log("Sound error"));
+
                     if (scores.p1 > scores.p2) {
                         winnerText.textContent = '🏆 Player 1 Wins! 🏆';
                     } else if (scores.p2 > scores.p1) {
@@ -402,5 +416,4 @@
         initGame();
     </script>
 </body>
-                                        </html>
-    
+</html>
