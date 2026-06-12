@@ -1,10 +1,11 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Match</title>
     <link rel="icon" type="image/png" href="icon.png">
+    <link rel="manifest" href="manifest.json">
     <style>
         * {
             box-sizing: border-box;
@@ -174,7 +175,6 @@
             color: #fffffe;
         }
 
-        /* Custom Winner Modal Style */
         .custom-modal {
             display: none;
             position: fixed;
@@ -278,7 +278,6 @@
         let activePlayer = 'p1';
         let canFlip = true;
 
-        // Creating a pool of 3 flip sounds to allow rapid successive plays
         const flipSounds = [
             new Audio('flip.mp3'),
             new Audio('flip.mp3'),
@@ -335,7 +334,6 @@
         }
 
         function playFlipSound() {
-            // Rotates through the audio pool to overlap sounds perfectly
             const sound = flipSounds[flipIndex];
             sound.currentTime = 0;
             sound.play().catch(err => console.log("Sound error"));
@@ -350,7 +348,6 @@
                 return;
             }
 
-            // Trigger the multi-pool flip sound instantly
             playFlipSound();
 
             card.classList.add('flipped');
@@ -431,5 +428,4 @@
     </script>
 </body>
 </html>
-       
                     
