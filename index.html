@@ -218,6 +218,79 @@ border-color: #b1b3fb;
 color: #b1b3fb;
 }
 
+/* सुंदर कस्टम गेम ओवर स्क्रीन */
+.modal-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.85);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 1000;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.3s ease;
+}
+
+.modal-overlay.show {
+opacity: 1;
+pointer-events: auto;
+}
+
+.modal-box {
+background: #17171e;
+border: 2px solid #282830;
+border-radius: 15px;
+padding: 30px;
+width: 85%;
+max-width: 350px;
+text-align: center;
+box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+transform: scale(0.7);
+transition: transform 0.3s ease;
+}
+
+.modal-overlay.show .modal-box {
+transform: scale(1);
+}
+
+.modal-title {
+font-size: 24px;
+color: #b1b3fb;
+margin-bottom: 15px;
+font-weight: bold;
+}
+
+.modal-scores {
+background: #0d0d12;
+border-radius: 10px;
+padding: 15px;
+margin-bottom: 20px;
+font-size: 16px;
+line-height: 1.6;
+color: #b1b3fb;
+}
+
+.modal-btn {
+background: #797bff;
+color: white;
+border: none;
+padding: 12px 30px;
+border-radius: 8px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+width: 100%;
+transition: background 0.2s;
+}
+
+.modal-btn:hover {
+background: #5b5dfa;
+}
+
 @media (max-width: 400px) {
 h1 { font-size: 24px; }
 .score-value { font-size: 22px; }
@@ -258,6 +331,16 @@ h1 { font-size: 24px; }
 
 <button class="restart-btn" id="restartBtn">Restart</button>
 
+<div class="modal-overlay" id="gameOverModal">
+<div class="modal-box">
+<div class="modal-title" id="winnerText">Game Over!</div>
+<div class="modal-scores" id="finalScoresText">
+Player 1: 0<br>Player 2: 0
+</div>
+<button class="modal-btn" id="modalCloseBtn">Play Again</button>
+</div>
+</div>
+
 <script>
 const grid = document.getElementById('gameGrid');
 const p1ScoreText = document.getElementById('p1Score');
@@ -266,8 +349,21 @@ const p1Scorecard = document.getElementById('player1Scorecard');
 const p2Scorecard = document.getElementById('player2Scorecard');
 const restartBtn = document.getElementById('restartBtn');
 
-// यहाँ गेम के लिए 8 सबसे बेस्ट और मज़ेदार इमोजी जोड़े सेट किए गए हैं
-const pairs = ['🤩', '🤩', '😎', '😎', '🥳', '🥳', '👻', '👻', '🔥', '🔥', '🤪', '🤪', '🤫', '🤫', '👑', '👑'];
+// पॉप-अप एलिमेंट्स
+const gameOverModal = document.getElementById('gameOverModal');
+const winnerText = document.getElementById('winnerText');
+const finalScoresText = document.getElementById('finalScoresText');
+const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+// यहाँ 34 मजेदार इमोजीस का बड़ा पूल है, जिससे हर मैच में रैंडम जोड़े बनेंगे
+const emojiPool = [
+'🤩', '😎', '🥳', '👻', '🔥', '🤪', '🤫', '👑', 
+'🤖', '👽', '🐶', '🐱', '🦁', '🐵', '🦊', '🦄', 
+'🍕', '🍔', '🍟', '🍦', '🎮', '⚽', '🎸', '🚀', 
+'🛸', '💎', '🎈', '🎉', '🍿', '🐼', '🐯', '🌈', '⚡', '🔮'
+];
+
+let pairs = [];
 let flippedCards = [];
 let p1Score = 0;
 let p2Score = 0;
@@ -282,9 +378,22 @@ const j = Math.floor(Math.random() * (i + 1));
 return array;
 }
 
+// हर मैच के लिए अलग और रैंडम इमोजी जोड़े चुनने का फंक्शन
+function selectRandomPairs() {
+// पहले पूरे इमोजी पूल को मिक्स करते हैं
+let shuffledPool = shuffleArray([...emojiPool]);
+// उसमें से शुरुआती 8 अलग-अलग इमोजी चुनते हैं
+let selectedEmojis = shuffledPool.slice(0, 8);
+// उनके जोड़े (8 * 2 = 16) बनाते हैं
+pairs = [...selectedEmojis, ...selectedEmojis];
+}
+
 function generateGrid() {
 grid.innerHTML = '';
-shuffleArray([...pairs]).forEach(pairSymbol => {
+selectRandomPairs(); // नए रैंडम इमोजी सिलेक्ट करें
+shuffleArray(pairs); // उन्हें ग्रिड के लिए मिक्स करें
+
+pairs.forEach(pairSymbol => {
 const card = document.createElement('div');
 card.classList.add('card');
 card.dataset.pairSymbol = pairSymbol;
@@ -361,13 +470,16 @@ p2Scorecard.classList.toggle('active');
 function checkGameOver() {
 const matchedCards = grid.querySelectorAll('.card[data-matched="true"]');
 if (matchedCards.length === pairs.length) {
-let winner = 'No one! It\'s a draw!';
+let winner = "No one! It's a draw!";
 if (p1Score > p2Score) {
-winner = 'Player 1 Wins!';
+winner = 'Player 1 Wins! 🎉';
 } else if (p2Score > p1Score) {
-winner = 'Player 2 Wins!';
+winner = 'Player 2 Wins! 🎉';
 }
-alert(`Game Over! ${winner}\nFinal Scores:\nPlayer 1: ${p1Score}\nPlayer 2: ${p2Score}`);
+
+winnerText.textContent = winner;
+finalScoresText.innerHTML = `Final Scores:<br><b>Player 1:</b> ${p1Score}<br><b>Player 2:</b> ${p2Score}`;
+gameOverModal.classList.add('show');
 }
 }
 
@@ -381,13 +493,16 @@ currentPlayer = 1;
 p1Scorecard.classList.add('active');
 p2Scorecard.classList.toggle('active', false);
 isFlippingDisabled = false;
-generateGrid();
+gameOverModal.classList.remove('show');
+generateGrid(); // रीस्टार्ट करने पर बिल्कुल नए इमोजी लोड होंगे
 }
 
 restartBtn.addEventListener('click', restartGame);
+modalCloseBtn.addEventListener('click', restartGame);
 generateGrid();
 </script>
 
 </body>
-</html>
+  </html>
+  
 
