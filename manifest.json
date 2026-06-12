@@ -1,0 +1,21 @@
+{
+  "short_name": "Memory Match",
+  "name": "Memory Match Puzzle Game",
+  "icons": [
+    {
+      "src": "icon.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "index.html",
+  "background_color": "#0f0e17",
+  "display": "standalone",
+  "theme_color": "#7f5af0",
+  "orientation": "portrait"
+}
