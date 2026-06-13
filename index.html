@@ -22,8 +22,74 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
+            overflow-x: hidden;
         }
 
+        /* 👑 न्यू लोडिंग स्क्रीन स्टाइल */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0f0e17;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+
+        .loader-logo {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        .loader-text {
+            font-size: 1.2rem;
+            color: #ff8906;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            animation: blink 1s infinite alternate;
+        }
+
+        .progress-bar-container {
+            width: 200px;
+            height: 6px;
+            background-color: #16161a;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #24242e;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #7f5af0, #ff8906);
+            border-radius: 10px;
+            animation: fillBar 2.5s forwards cubic-bezier(0.1, 0.85, 0.25, 1);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; text-shadow: 0 0 20px rgba(255, 137, 6, 0.6); }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        @keyframes blink {
+            from { opacity: 0.4; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fillBar {
+            to { width: 100%; }
+        }
+
+        /* गेम का बाकी स्टाइल */
         #game-container {
             width: 100%;
             max-width: 400px;
@@ -238,6 +304,14 @@
 </head>
 <body>
 
+    <div id="loading-screen">
+        <div class="loader-logo">🧠🔥</div>
+        <div class="loader-text">Loading Game...</div>
+        <div class="progress-bar-container">
+            <div class="progress-bar"></div>
+        </div>
+    </div>
+
     <div id="game-container">
         <h1>Memory Match</h1>
         <div class="subtitle">2 Player Puzzle Game</div>
@@ -271,7 +345,14 @@
     </div>
 
     <script>
-        const emojis = ['🧠', '🧠', '⚡', '⚡', '⭐', '⭐', '🔥', '🔥', '👑', '👑', '💎', '💎', '🍀', '🍀', '🎯', '🎯'];
+        // 👑 यहाँ हैं पूरे 30 अलग-अलग कड़क इमोजी का पूल!
+        const emojiPool = [
+            '🧠', '⚡', '⭐', '🔥', '👑', '💎', '🍀', '🎯', 
+            '🦁', '👽', '👻', '🚀', '🎸', '🎮', '🍕', '🍿', 
+            '🐱', '🐼', '🦊', '🦖', '⚽', '🏀', '🌍', '🌋', 
+            '🔮', '🎭', '🥊', '🎨', '🔑', '🌈'
+        ];
+        
         let shuffledEmojis = [];
         let flippedCards = [];
         let scores = { p1: 0, p2: 0 };
@@ -300,6 +381,16 @@
         const winnerText = document.getElementById('winnerText');
         const modalPlayAgain = document.getElementById('modalPlayAgain');
 
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const loader = document.getElementById('loading-screen');
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 500);
+            }, 3000); 
+        });
+
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -308,9 +399,17 @@
             return array;
         }
 
+        // 👑 30 में से 8 रैंडम जोड़े (16 कार्ड) चुनने का नया मस्त लॉजिक
+        function getGameEmojis() {
+            let tempPool = [...emojiPool];
+            shuffle(tempPool); // पूरे पूल को मिक्स किया
+            let selected = tempPool.slice(0, 8); // टॉप के 8 अलग इमोजी उठाए
+            return shuffle([...selected, ...selected]); // उनके जोड़े बनाकर दोबारा मिक्स किया
+        }
+
         function initGame() {
             gridElement.innerHTML = '';
-            shuffledEmojis = shuffle([...emojis]);
+            shuffledEmojis = getGameEmojis(); // अब हर बार नए इमोजी आएंगे!
             flippedCards = [];
             scores = { p1: 0, p2: 0 };
             activePlayer = 'p1';
@@ -428,4 +527,4 @@
     </script>
 </body>
 </html>
-                    
+                       
