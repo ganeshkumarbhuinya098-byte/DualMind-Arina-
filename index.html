@@ -1,4 +1,4 @@
-OCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -109,22 +109,9 @@ OCTYPE html>
         .subtitle {
             font-size: 0.8rem;
             color: #ff8906;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             text-transform: uppercase;
             letter-spacing: 2px;
-        }
-
-        /* 👑 टर्न टाइमर डिस्प्ले स्टाइल */
-        #timer-display {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #ff8906;
-            background-color: #16161a;
-            padding: 5px 15px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-bottom: 15px;
-            border: 1px solid #24242e;
         }
 
         .scoreboard {
@@ -334,8 +321,6 @@ OCTYPE html>
         <h1>Memory Match</h1>
         <div class="subtitle">2 Player Puzzle Game</div>
 
-        <div id="timer-display">⏱️ Time Left: <span id="time-counter">10</span>s</div>
-
         <div class="scoreboard">
             <div id="p1-box" class="player-box active">
                 <div class="avatar">P1</div>
@@ -379,10 +364,6 @@ OCTYPE html>
         let activePlayer = 'p1';
         let canFlip = true;
 
-        // 👑 टर्न टाइमर वेरिएबल्स
-        let turnTimer = null;
-        let timeLeft = 10;
-
         const flipSounds = [
             new Audio('flip.mp3'),
             new Audio('flip.mp3'),
@@ -404,7 +385,6 @@ OCTYPE html>
         const resultModal = document.getElementById('resultModal');
         const winnerText = document.getElementById('winnerText');
         const modalPlayAgain = document.getElementById('modalPlayAgain');
-        const timeCounterElement = document.getElementById('time-counter');
 
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
@@ -412,7 +392,6 @@ OCTYPE html>
                 loader.style.opacity = '0';
                 setTimeout(() => {
                     loader.style.display = 'none';
-                    startTurnTimer(); // लोडिंग स्क्रीन हटने के बाद पहला टाइमर शुरू होगा
                 }, 500);
             }, 3000); 
         });
@@ -432,44 +411,7 @@ OCTYPE html>
             return shuffle([...selected, ...selected]); 
         }
 
-        // 👑 10-सेकंड का लाइव टर्न टाइमर लॉजिक
-        function startTurnTimer() {
-            clearInterval(turnTimer); // पुराना टाइमर साफ़ करें
-            timeLeft = 10;
-            timeCounterElement.textContent = timeLeft;
-
-            turnTimer = setInterval(() => {
-                timeLeft--;
-                timeCounterElement.textContent = timeLeft;
-
-                if (timeLeft <= 0) {
-                    clearInterval(turnTimer);
-                    handleTimeOut(); // टाइम खत्म होने पर टर्न बदलें
-                }
-            }, 1000);
-        }
-
-        // 👑 टाइम आउट होने पर सिर्फ टर्न बदलने का फंक्शन
-        function handleTimeOut() {
-            // अगर कोई कार्ड आधा खुला हुआ है, तो उसे वापस बंद कर दें
-            if (flippedCards.length > 0) {
-                flippedCards.forEach(card => {
-                    card.classList.remove('flipped');
-                    card.textContent = '?';
-                });
-                flippedCards = [];
-            }
-            
-            wrongSound.currentTime = 0;
-            wrongSound.play().catch(err => console.log("Sound error"));
-            
-            switchPlayer();
-            canFlip = true;
-            startTurnTimer(); // नए खिलाड़ी के लिए टाइमर फिर शुरू करें
-        }
-
         function initGame() {
-            clearInterval(turnTimer);
             gridElement.innerHTML = '';
             shuffledEmojis = getGameEmojis(); 
             flippedCards = [];
@@ -491,11 +433,6 @@ OCTYPE html>
                 card.textContent = '?';
                 card.addEventListener('click', handleCardClick);
                 gridElement.appendChild(card);
-            }
-
-            // अगर लोडिंग स्क्रीन पहले से गायब है (यानी मैन्युअल रीस्टार्ट पर) तो तुरंत टाइमर शुरू करें
-            if (document.getElementById('loading-screen').style.display === 'none') {
-                startTurnTimer();
             }
         }
 
@@ -538,9 +475,6 @@ OCTYPE html>
                 updateScores();
                 matchSound.currentTime = 0;
                 matchSound.play().catch(err => console.log("Sound error"));
-                
-                // 👑 मैच मिलने पर टाइमर को वापस 10 सेकंड पर रीसेट कर दें ताकि खिलाड़ी अगला चांस खेल सके
-                startTurnTimer(); 
             } else {
                 card1.classList.remove('flipped');
                 card2.classList.remove('flipped');
@@ -549,9 +483,6 @@ OCTYPE html>
                 wrongSound.currentTime = 0;
                 wrongSound.play().catch(err => console.log("Sound error"));
                 switchPlayer();
-                
-                // 👑 गलत मैच होने पर टर्न बदला, इसलिए नए टर्न का फ्रेश टाइमर शुरू करें
-                startTurnTimer();
             }
 
             flippedCards = [];
@@ -578,7 +509,6 @@ OCTYPE html>
         function checkGameOver() {
             const matchedCards = document.querySelectorAll('.card.matched');
             if (matchedCards.length === 16) {
-                clearInterval(turnTimer); // गेम खत्म होते ही टाइमर रोक दें
                 setTimeout(() => {
                     winSound.currentTime = 0;
                     winSound.play().catch(err => console.log("Sound error"));
@@ -601,5 +531,3 @@ OCTYPE html>
     </script>
 </body>
 </html>
-
-    
